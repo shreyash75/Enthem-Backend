@@ -1,13 +1,19 @@
 import express from "express";
-import {Request, Response} from "express";
+import config from "./config";
+import Logger from "./loaders/logger";
 
-const app = express();
-const port = 3000;
+async function startServer() {
+    const app = express();
 
-app.get("/", (req: Request, res: Response) => {
-    res.send("Hello world!");
-});
+    await require('./loaders').default({ expressApp: app });
 
-app.listen(port, () => {
-    console.log(`Connected successfully on port ${port}`);
-});
+    app.listen(config.port, () => {
+        Logger.info(`🔥🔥 Database Server connected on : ${config.databaseURL}🔥🔥 `);
+        Logger.info(`🔥🔥 Server listening on port: ${config.port}🔥🔥 `);
+    }).on('error', (err: any) => {
+        Logger.error(err);
+        process.exit(1);
+    });
+}
+
+startServer();
