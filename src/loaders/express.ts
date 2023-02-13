@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-// import routes from '../api';
+import routes from '../api';
 import config from '../config';
 import {Request, Response} from "express";
 
@@ -21,8 +21,7 @@ export default ({ app }: { app: express.Application }) => {
   }));
   app.use(bodyParser.json({}));
 
-  //! Load route apis
-  app.use(config.api.prefix, () => {});
+  app.use(config.api.prefix, routes());
 
   app.use((req: Request, res: Response, next: Function) => {
     const err = new Error('Not Found');
