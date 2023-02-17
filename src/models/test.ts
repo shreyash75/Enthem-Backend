@@ -7,7 +7,6 @@ const Test = new mongoose.Schema(
         type: String,
         required: [true, "name is required"],
         default: "name",
-
     }
   },
   { timestamps: true }

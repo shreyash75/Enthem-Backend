@@ -21,21 +21,24 @@ export default (app: Router) => {
         {/* encrypted: 'ENCRYPTION_OFF' */ },);
     
     const session = db.session({ database: "neo4j" });
-        
+    
     // Get User Data
-    route.get('/', async (req: Request, res: Response, next: NextFunction) => {
+    route.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const id = req.params.id;
+            console.log(id);
+
             const query =
             `
-            MATCH (n:User)
+            MATCH (n:User{sessionId: "${id}"})
             RETURN n;
             `;
-            
             const result = await session.run(query);
             console.log("RESULT:");
-            result.records.forEach(i=>console.log(i.get("n").properties));
+            const resultList = [];
+            result.records.forEach(i=> resultList.push(i.get("n").properties));
             
-            return res.status(201).json({ "Server Working": true });
+            return res.status(201).json({ "status": 200, "data": resultList});
         } catch (e) {
             return next(e);
         }
