@@ -7,7 +7,7 @@ import {Request, Response} from "express";
 
 export default ({ app }: { app: express.Application }) => {
   app.get('/status', (req: Request, res: Response) => {
-    res.status(500).send("Server is running successfully!");
+    res.status(200).send("Server is running successfully!");
   });
 
   app.head('/status', (req: Request, res: Response) => {
