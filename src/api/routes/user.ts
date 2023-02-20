@@ -21,7 +21,25 @@ export default (app: Router) => {
         {/* encrypted: 'ENCRYPTION_OFF' */ },);
     
     const session = db.session({ database: "neo4j" });
-    
+
+    // Get All User Data
+    route.get('/', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const query =
+            `
+            MATCH (n:User)
+            RETURN n;
+            `;
+            const result = await session.run(query);
+            const resultList = [];
+            result.records.forEach(i=> resultList.push(i.get("n").properties));
+            
+            return res.status(200).json({ "status": 200, "data": resultList});
+        } catch (e) {
+            return next(e);
+        }
+    }); 
+
     // Get User Data
     route.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -34,7 +52,6 @@ export default (app: Router) => {
             RETURN n;
             `;
             const result = await session.run(query);
-            console.log("RESULT:");
             const resultList = [];
             result.records.forEach(i=> resultList.push(i.get("n").properties));
             
@@ -60,7 +77,6 @@ export default (app: Router) => {
                 `;
     
                 const result = await session.run(query);
-                console.log("RESULT:");
                 const resultList = [];
                 result.records.forEach(i=> resultList.push(i.get("u").properties));
                 
@@ -79,7 +95,6 @@ export default (app: Router) => {
                 `;
 
                 const result = await session.run(query);
-                console.log("RESULT:");
                 const resultList = [];
                 result.records.forEach(i=> resultList.push(i.get("u").properties));
                 
