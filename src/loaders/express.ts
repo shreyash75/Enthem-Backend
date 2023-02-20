@@ -4,10 +4,13 @@ import cors from 'cors';
 import routes from '../api';
 import config from '../config';
 import {Request, Response} from "express";
+import morgan from "morgan";
 
 export default ({ app }: { app: express.Application }) => {
+  app.use(morgan("dev"));
+  
   app.get('/status', (req: Request, res: Response) => {
-    res.status(200).send("Server is running successfully!");
+    res.status(200).send({status:200, message:"Server is running successfully!"});
   });
 
   app.head('/status', (req: Request, res: Response) => {
