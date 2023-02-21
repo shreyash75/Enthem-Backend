@@ -4,14 +4,6 @@ import config from "../../config";
 
 const route = Router();
 
-// email
-// Photo -> URL
-// Username
-// Gender
-// DOB
-// Skills
-// Interests
-// Geo Location 
 
 //! Solve Container.get(logger) issue
 export default (app: Router) => {
@@ -23,11 +15,11 @@ export default (app: Router) => {
     const session = db.session({ database: "neo4j" });
         
     // Get User Data
-    route.get('/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
+    route.get('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query =
             `
-            MATCH (n:User{sessionId:"${req.params.sessionId}"})
+            MATCH (n:User{sessionId:"${req.body.sessionId}"})
             RETURN n;
             `;
             
@@ -43,18 +35,20 @@ export default (app: Router) => {
     });  
 
     // Create User Data
-    route.post('/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
+    route.post('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query =
                 `
-                MERGE (u:User {sessionId:"${req.params.sessionId}"})
-                ON CREATE SET u.age = ${req.body.age}, 
+                MERGE (u:User {sessionId:"${req.body.sessionId}"})
+                ON CREATE SET u.sessionId="${req.body.sessionId}", 
+                                u.name = "${req.body.username}",
+                                u.emailId="${req.body.email}",
                                 u.gender = "${req.body.gender}",
-                                u.sessionId="${req.params.sessionId}" ,
-                                u.latitude = ${req.body.latitude},
-                                u.longitude = ${req.body.longitude},
-                                u.name = "${req.body.name}"
+                                u.age = ${req.body.age},
+                                u.latitude=${req.body.latitude},
+                                u.longitude=${req.body.longitude}
                 RETURN u
+
                 `;
     
                 const result = await session.run(query);
@@ -69,12 +63,13 @@ export default (app: Router) => {
     });
 
     // Update User Data
-    route.put('/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
+    route.put('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query =
                 `
-                MATCH (u:User {sessionId:"${req.params.sessionId}"}) SET u.age= ${req.body.age} RETURN u
+                MATCH (u:User {sessionId:"${req.body.sessionId}"}) SET u.age= ${req.body.age} RETURN u
                 `;
+
 
                 const result = await session.run(query);
                 console.log("RESULT:");
@@ -88,11 +83,11 @@ export default (app: Router) => {
     });    
 
     // Delete User Data
-    route.delete('/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
+    route.delete('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query =
                 `
-                MATCH (u:User {sessionId: "${req.params.sessionId}"}) DETACH DELETE u
+                MATCH (u:User {sessionId: "${req.body.sessionId}"}) DETACH DELETE u
                 `;
 
             const session = db.session({ database: "neo4j" });
@@ -104,12 +99,12 @@ export default (app: Router) => {
     });
 
     //recommend by location and skills if any single match
-    route.get('/recommend/:sessionId', async (req: Request, res: Response, next: NextFunction) => {
+    route.get('/recommend', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query =
             `
             MATCH (u:User)-[:HAS_SKILL]->(s:Activity)<-[:HAS_SKILL]-(u2:User)
-            WHERE u.sessionId = "${req.params.sessionId}"
+            WHERE u.sessionId = "${req.body.sessionId}"
             AND u.latitude IS NOT NULL AND u.longitude IS NOT NULL 
             AND u2.sessionId <> u.sessionId 
             AND u2.latitude IS NOT NULL AND u2.longitude IS NOT NULL 
