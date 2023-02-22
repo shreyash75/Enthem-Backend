@@ -90,7 +90,6 @@ export default (app: Router) => {
                 MATCH (u:User {sessionId: "${req.body.sessionId}"}) DETACH DELETE u
                 `;
 
-            const session = db.session({ database: "neo4j" });
             const result = await session.run(query);
             console.log("User Profile Deleted Successfully !");
         } catch (e) {
