@@ -43,8 +43,8 @@ export default (app: Router) => {
                 ON CREATE SET u.sessionId="${req.body.sessionId}", 
                                 u.name = "${req.body.username}",
                                 u.emailId="${req.body.email}",
-                                u.gender = "${req.body.gender}",
-                                u.age = ${req.body.age},
+                                u.gender = COALESCE("${req.body.gender}","Unknown"),
+                                u.age = COALESCE(${req.body.age},20),
                                 u.latitude=${req.body.latitude},
                                 u.longitude=${req.body.longitude}
                 RETURN u
