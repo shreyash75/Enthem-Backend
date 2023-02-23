@@ -10,7 +10,7 @@ const db = driver(config.databaseURL, auth.basic(config.dbUser, config.dbPass),
 const updateUserAge = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = `
-      MATCH (u:User {sessionId:"${req.body.sessionId}"})
+      MATCH (u:User {id:"${req.body.id}"})
       SET u.age = ${req.body.age}
       RETURN u
     `;
@@ -26,7 +26,7 @@ const updateUserAge = async (req: Request, res: Response, next: NextFunction) =>
 const getUserBySessionId = async (req:Request, res:Response, next:NextFunction) => {
   try {
     const query = `
-      MATCH (n:User {sessionId:"${req.body.sessionId}"})
+      MATCH (n:User {id:"${req.body.id}"})
       RETURN n;
     `;
     const result = await session.run(query);
@@ -41,8 +41,8 @@ const getUserBySessionId = async (req:Request, res:Response, next:NextFunction) 
 const createUser = async (req:Request, res:Response, next:NextFunction) => {
   try {
     const query = `
-      MERGE (u:User {sessionId:"${req.body.sessionId}"})
-      ON CREATE SET u.sessionId="${req.body.sessionId}",
+      MERGE (u:User {id:"${req.body.id}"})
+      ON CREATE SET u.id="${req.body.id}",
                     u.name = "${req.body.username}",
                     u.emailId="${req.body.email}",
                     u.gender = COALESCE("${req.body.gender}","Unknown"),
@@ -63,7 +63,7 @@ const createUser = async (req:Request, res:Response, next:NextFunction) => {
 const deleteUser= async (req: Request, res: Response, next: NextFunction)=>{
   try {
     const query = `
-      MATCH (u:User {sessionId: "${req.body.sessionId}"})
+      MATCH (u:User {id: "${req.body.id}"})
       DETACH DELETE u
     `;
     await session.run(query);
@@ -79,7 +79,7 @@ const recommendUser=async (req: Request, res: Response, next: NextFunction)=>{
   try {
     const query = `
       MATCH (u:User)-[:HAS_SKILL]->(s:Activity)<-[:HAS_SKILL]-(u2:User)
-      WHERE u.sessionId = "${req.body.sessionId}"
+      WHERE u.sessionId = "${req.body.id}"
       AND u.latitude IS NOT NULL AND u.longitude IS NOT NULL 
       AND u2.sessionId <> u.sessionId 
       AND u2.latitude IS NOT NULL AND u2.longitude IS NOT NULL 
