@@ -18,4 +18,6 @@ export default (app: Router) => {
     route.delete('/', userController.deleteUser);
     route.get('/recommend',userController.recommendUser);
 
+     
+
 };
