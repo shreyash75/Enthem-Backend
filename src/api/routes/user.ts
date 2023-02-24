@@ -17,7 +17,7 @@ export default (app: Router) => {
     route.post('/', userController.createUser);
     route.delete('/', userController.deleteUser);
     route.get('/recommend',userController.recommendUser);
-
-     
+    route.post('/createSkills',userController.createSkills);
+    route.post('/createInterests',userController.createInterests);
 
 };

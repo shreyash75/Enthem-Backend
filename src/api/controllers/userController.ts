@@ -79,9 +79,9 @@ const recommendUser=async (req: Request, res: Response, next: NextFunction)=>{
   try {
     const query = `
       MATCH (u:User)-[:HAS_SKILL]->(s:Activity)<-[:HAS_SKILL]-(u2:User)
-      WHERE u.sessionId = "${req.body.id}"
+      WHERE u.id = "${req.body.id}"
       AND u.latitude IS NOT NULL AND u.longitude IS NOT NULL 
-      AND u2.sessionId <> u.sessionId 
+      AND u2.id <> u.id 
       AND u2.latitude IS NOT NULL AND u2.longitude IS NOT NULL 
       WITH u, u2, s, u.latitude * pi() / 180 AS lat1, u.longitude * pi() / 180 AS lon1,
           u2.latitude * pi() / 180 AS lat2, u2.longitude * pi() / 180 AS lon2,
@@ -92,14 +92,58 @@ const recommendUser=async (req: Request, res: Response, next: NextFunction)=>{
           cos(lat1) AS c,
           cos(lat2) AS d
       WITH u, u2, s, r * asin(sqrt(a^2 + c * d * b^2)) AS distance
-      WHERE distance <=10
-      RETURN u2
+      WHERE distance <=100
+      RETURN DISTINCT u2
     `;
 
     const result = await session.run(query);
     console.log("RESULT:");
     const resultList = [];
     result.records.forEach((i) => resultList.push(i.get("u2").properties));
+
+    return res.status(201).json({ status: 200, data: resultList });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+const createSkills=async (req: Request, res: Response, next: NextFunction)=>{
+  try {
+    const skills = req.body.skills.map(skill => `"${skill}"`).join(', ');
+    const query = `
+      WITH [${skills}] AS skillsList
+      UNWIND skillsList AS skill
+      MERGE (s:Activity {name:skill})
+      WITH s
+      MATCH (u:User {id:"${req.body.id}"})
+      MERGE (u)-[:HAS_SKILL]->(s)
+    `;
+
+    const result = await session.run(query);
+    console.log("RESULT:");
+    const resultList = "Done Skills";
+
+    return res.status(201).json({ status: 200, data: resultList });
+  } catch (e) {
+    return next(e);
+  }
+};
+
+const createInterests=async (req: Request, res: Response, next: NextFunction)=>{
+  try {
+    const interests = req.body.interests.map(interest => `"${interest}"`).join(', ');
+    const query = `
+      WITH [${interests}] AS interestsList
+      UNWIND interestsList AS interest
+      MERGE (s:Activity {name:interest})
+      WITH s
+      MATCH (u:User {id:"${req.body.id}"})
+      MERGE (u)-[:HAS_INTEREST]->(s)
+    `;
+
+    const result = await session.run(query);
+    console.log("RESULT:");
+    const resultList = "Done Interests";
 
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
@@ -114,4 +158,6 @@ module.exports = {
   createUser,
   deleteUser,
   recommendUser,
+  createSkills,
+  createInterests,
 };
