@@ -1,11 +1,14 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { driver, auth } from "neo4j-driver";
 import config from "../../config";
+import debugError from '../../services/debug_error';
 
+
+//! Solve Container.get(logger) issue
 const db = driver(config.databaseURL, auth.basic(config.dbUser, config.dbPass),
-        {/* encrypted: 'ENCRYPTION_OFF' */ },);
-    
-    const session = db.session({ database: "neo4j" });
+  {/* encrypted: 'ENCRYPTION_OFF' */ },);
+
+const session = db.session({ database: "neo4j" });
 
 const updateUserAge = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -18,12 +21,13 @@ const updateUserAge = async (req: Request, res: Response, next: NextFunction) =>
     const resultList = result.records.map((record) => record.get('u').properties);
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
+    debugError(e.toString());
     return next(e);
   }
 };
 
 
-const getUserBySessionId = async (req:Request, res:Response, next:NextFunction) => {
+const getUserBySessionId = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = `
       MATCH (n:User {id:"${req.body.id}"})
@@ -33,12 +37,28 @@ const getUserBySessionId = async (req:Request, res:Response, next:NextFunction) 
     const resultList = result.records.map((record) => record.get('n').properties);
     return res.status(200).json({ status: 200, data: resultList });
   } catch (e) {
+    debugError(e.toString());
+    return next(e);
+  }
+};
+
+const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const query = `
+      MATCH (n:User)
+      RETURN n;
+    `;
+    const result = await session.run(query);
+    const resultList = result.records.map((record) => record.get('n').properties);
+    return res.status(200).json({ status: 200, data: resultList });
+  } catch (e) {
+    debugError(e);
     return next(e);
   }
 };
 
 
-const createUser = async (req:Request, res:Response, next:NextFunction) => {
+const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = `
       MERGE (u:User {id:"${req.body.id}"})
@@ -55,12 +75,13 @@ const createUser = async (req:Request, res:Response, next:NextFunction) => {
     const resultList = result.records.map((record) => record.get('u').properties);
     return res.status(200).json({ status: 200, data: resultList });
   } catch (e) {
+    debugError(e.toString());
     return next(e);
   }
 };
 
 
-const deleteUser= async (req: Request, res: Response, next: NextFunction)=>{
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = `
       MATCH (u:User {id: "${req.body.id}"})
@@ -70,12 +91,13 @@ const deleteUser= async (req: Request, res: Response, next: NextFunction)=>{
     console.log("User Profile Deleted Successfully !");
     return res.sendStatus(204);
   } catch (e) {
+    debugError(e.toString());
     return next(e);
   }
 };
 
 
-const recommendUser=async (req: Request, res: Response, next: NextFunction)=>{
+const recommendUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const query = `
       MATCH (u:User)-[:HAS_SKILL]->(s:Activity)<-[:HAS_SKILL]-(u2:User)
@@ -103,11 +125,12 @@ const recommendUser=async (req: Request, res: Response, next: NextFunction)=>{
 
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
+    debugError(e.toString());
     return next(e);
   }
 };
 
-const createSkills=async (req: Request, res: Response, next: NextFunction)=>{
+const createSkills = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const skills = req.body.skills.map(skill => `"${skill}"`).join(', ');
     const query = `
@@ -125,11 +148,12 @@ const createSkills=async (req: Request, res: Response, next: NextFunction)=>{
 
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
+    debugError(e.toString());
     return next(e);
   }
 };
 
-const createInterests=async (req: Request, res: Response, next: NextFunction)=>{
+const createInterests = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const interests = req.body.interests.map(interest => `"${interest}"`).join(', ');
     const query = `
@@ -147,6 +171,7 @@ const createInterests=async (req: Request, res: Response, next: NextFunction)=>{
 
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
+    debugError(e.toString());
     return next(e);
   }
 };
@@ -155,6 +180,7 @@ const createInterests=async (req: Request, res: Response, next: NextFunction)=>{
 module.exports = {
   updateUserAge,
   getUserBySessionId,
+  getAllUsers,
   createUser,
   deleteUser,
   recommendUser,
