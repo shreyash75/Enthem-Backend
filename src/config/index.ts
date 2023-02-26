@@ -18,7 +18,6 @@ export default {
   progressToken: process.env.PROGRESS_TOKEN,
 
   jwtSecret: process.env.JWT_SECRET,
-  jwtAlgorithm: process.env.JWT_ALGO,
 
   logs: {
     level: process.env.LOG_LEVEL || 'silly',

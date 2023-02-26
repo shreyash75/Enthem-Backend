@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ITest } from '../interfaces/ITest';
+import { ITest } from '../../interfaces/ITest';
 
 const Test = new mongoose.Schema(
   {    
