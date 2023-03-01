@@ -11,6 +11,7 @@ export default (app: Router) => {
     route.get('/all', checkAuth, userController.getAllUsers);
     route.get('/', checkAuth, userController.getUserBySessionId);
     route.get('/recommend', checkAuth, userController.recommendUser);
+    route.get('/locRecommend',checkAuth,userController.locRecommend);
 
     //* POST CALLS
     route.post('/', checkAuth, userController.createUser);
