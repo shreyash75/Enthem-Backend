@@ -8,10 +8,10 @@ export default (app: Router) => {
     app.use('/user', route);
 
     //* GET CALLS
-    route.get('/all', checkAuth, userController.getAllUsers);
-    route.get('/', checkAuth, userController.getUserBySessionId);
-    route.get('/recommend', checkAuth, userController.recommendUser);
-    route.get('/locRecommend',checkAuth,userController.locRecommend);
+    route.get('/all',   userController.getAllUsers);
+    route.get('/', userController.getUserBySessionId);
+    route.get('/recommend', userController.recommendUser);
+    route.get('/locRecommend',userController.locRecommend);
 
     //* POST CALLS
     route.post('/', checkAuth, userController.createUser);
