@@ -8,10 +8,11 @@ import debugError from '../../services/debug_error';
 const db = driver(config.databaseURL, auth.basic(config.dbUser, config.dbPass),
   {/* encrypted: 'ENCRYPTION_OFF' */ },);
 
-const session = db.session({ database: "neo4j" });
+// const session = db.session({ database: "neo4j" });
 
 const updateUserAge = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MATCH (u:User {id:"${req.body.id}"})
       SET u.age = ${req.body.age}
@@ -29,6 +30,7 @@ const updateUserAge = async (req: Request, res: Response, next: NextFunction) =>
 
 const getUserBySessionId = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MATCH (n:User {id:"${req.body.id}"})
       RETURN n.id AS id, n.name AS name, n.email AS email, n.age AS age,
@@ -47,6 +49,7 @@ const getUserBySessionId = async (req: Request, res: Response, next: NextFunctio
       latitude: record.get('latitude'),
       longitude: record.get('longitude')
     };
+    await session.close 
     return res.status(200).json({ status: 200, data });
   } catch (e) {
     debugError(e.toString());
@@ -56,6 +59,7 @@ const getUserBySessionId = async (req: Request, res: Response, next: NextFunctio
 
 const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MATCH (n:User)
       RETURN n.id AS id, n.name AS name, n.email AS emailId, n.age AS age,
@@ -73,6 +77,7 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
       latitude: record.get('latitude'),
       longitude: record.get('longitude')
     }));
+    await session.close 
     return res.status(200).json({ status: 200, data: resultList });
   } catch (e) {
     debugError(e.toString());
@@ -85,6 +90,7 @@ const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MERGE (u:User {id:"${req.body.id}"})
       ON CREATE SET u.id="${req.body.id}",
@@ -98,7 +104,8 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       RETURN u
     `;
     await session.run(query);
-    console.log("User Profile Created Successfully. Welcome to Enthem !");
+    // console.log("User Profile Created Successfully. Welcome to Enthem !");
+    await session.close 
     return res.sendStatus(204);
   } catch (e) {
     debugError(e.toString());
@@ -110,12 +117,14 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MATCH (u:User {id: "${req.body.id}"})
       DETACH DELETE u
     `;
     await session.run(query);
-    console.log("User Profile Deleted Successfully !");
+    // console.log("User Profile Deleted Successfully !");
+    await session.close 
     return res.sendStatus(204);
   } catch (e) {
     debugError(e.toString());
@@ -126,6 +135,7 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const locRecommend = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MATCH (u:User)
       WHERE u.id = "${req.body.id}" 
@@ -153,6 +163,7 @@ const locRecommend = async (req: Request, res: Response, next: NextFunction) => 
       latitude: record.get('latitude'),
       longitude: record.get('longitude')
     }));
+    await session.close 
     return res.status(200).json({ status: 200, data: resultList });
   } catch (e) {
     debugError(e.toString());
@@ -163,6 +174,7 @@ const locRecommend = async (req: Request, res: Response, next: NextFunction) => 
 
 const recommendUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const query = `
       MATCH (u:User)-[:HAS_SKILL]->(s:Activity)<-[:HAS_INTEREST]-(u2:User)
       WHERE u.id = "${req.body.id}"
@@ -190,6 +202,7 @@ const recommendUser = async (req: Request, res: Response, next: NextFunction) =>
       latitude: record.get('latitude'),
       longitude: record.get('longitude')
     }));
+    await session.close 
     return res.status(200).json({ status: 200, data: resultList });
   } catch (e) {
     debugError(e.toString());
@@ -199,6 +212,7 @@ const recommendUser = async (req: Request, res: Response, next: NextFunction) =>
 
 const createSkills = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const skills = req.body.skills.map(skill => `"${skill}"`).join(', ');
     const query = `
       WITH [${skills}] AS skillsList
@@ -210,8 +224,9 @@ const createSkills = async (req: Request, res: Response, next: NextFunction) => 
     `;
 
     const result = await session.run(query);
-    console.log("RESULT:");
+    // console.log("RESULT:");
     const resultList = "Done Skills";
+    await session.close 
 
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
@@ -222,6 +237,7 @@ const createSkills = async (req: Request, res: Response, next: NextFunction) => 
 
 const createInterests = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const session = db.session({ database: "neo4j" });
     const interests = req.body.interests.map(interest => `"${interest}"`).join(', ');
     const query = `
       WITH [${interests}] AS interestsList
@@ -233,8 +249,9 @@ const createInterests = async (req: Request, res: Response, next: NextFunction) 
     `;
 
     const result = await session.run(query);
-    console.log("RESULT:");
+    // console.log("RESULT:");
     const resultList = "Done Interests";
+    await session.close 
 
     return res.status(201).json({ status: 200, data: resultList });
   } catch (e) {
